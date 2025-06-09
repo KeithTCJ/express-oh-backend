@@ -17,15 +17,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-@Data //Generates the getters, setters, toString, @RequiredArgsConstructor
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @Column(name="sku")
@@ -80,6 +76,83 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "flavor_id")
     )
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Set<Flavor> flavors;
+    private List<Flavor> flavors;
 
+    // Constructors
+
+    public Product() {
+    }
+
+    public Product(Long id, String sku, String name, String description, BigDecimal price, String imageURL, @NotNull(message = "Inventory count must be provided.") Integer inventoryCount, List<Flavor> flavors) {
+        this.id = id;
+        this.sku = sku;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.imageURL = imageURL;
+        this.inventoryCount = inventoryCount;
+        this.flavors = flavors;
+    }
+
+    // Getters and Setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
+    public Integer getInventoryCount() {
+        return inventoryCount;
+    }
+
+    public void setInventoryCount(Integer inventoryCount) {
+        this.inventoryCount = inventoryCount;
+    }
+
+    public List<Flavor> getFlavors() {
+        return flavors;
+    }
+
+    public void setFlavors(List<Flavor> flavors) {
+        this.flavors = flavors;
+    }
 }
