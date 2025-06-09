@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.io.Serializable;
-import java.util.Objects;
-
 
 @Entity
 public class OrderProduct {

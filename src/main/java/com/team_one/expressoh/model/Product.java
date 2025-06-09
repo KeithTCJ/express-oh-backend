@@ -22,7 +22,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name="sku")
     @NotBlank(message = "Product SKU cannot be blank.")
@@ -45,7 +45,7 @@ public class Product {
     @Column(name = "price")
     @DecimalMin(value = "0.0", inclusive = false, message = "Product Price must be more than 0.")
     @Digits(integer = 10, fraction = 2, message = "Product Price must be numerical.")
-    private BigDecimal price;
+    private Double price;
 
     @Column(name = "imageurl")
     @NotBlank(message = "Image URL cannot be blank.")
@@ -83,7 +83,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(Long id, String sku, String name, String description, BigDecimal price, String imageURL, @NotNull(message = "Inventory count must be provided.") Integer inventoryCount, List<Flavor> flavors) {
+    public Product(Integer id, String sku, String name, String description, Double price, String imageURL, @NotNull(message = "Inventory count must be provided.") Integer inventoryCount, List<Flavor> flavors) {
         this.id = id;
         this.sku = sku;
         this.name = name;
@@ -96,7 +96,7 @@ public class Product {
 
     // Getters and Setters
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -124,11 +124,11 @@ public class Product {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

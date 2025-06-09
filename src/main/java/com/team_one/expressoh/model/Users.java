@@ -55,9 +55,7 @@ public class Users {
         return role;
     }
 
-    // setters
-
-    // setter for id omitted since again, it is auto-generated
+    // setter
 
     public void setEmail(String email) {
         this.email = email;

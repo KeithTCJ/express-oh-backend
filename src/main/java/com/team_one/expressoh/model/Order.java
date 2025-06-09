@@ -6,7 +6,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
+
 
 @Entity
 @Table(name = "orders")
@@ -31,7 +32,7 @@ public class Order {
     private Double totalCost;
 
     @OneToMany(mappedBy = "order")
-    private Set<OrderProduct> products;
+    private List<OrderProduct> products;
 
     // Constructors, getters, and setters
     public Order() {}
