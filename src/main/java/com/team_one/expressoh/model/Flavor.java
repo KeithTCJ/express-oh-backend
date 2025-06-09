@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 
 
 @Entity
-@Table(name = "flavor")
 public class Flavor {
 
     @Column (name = "id")

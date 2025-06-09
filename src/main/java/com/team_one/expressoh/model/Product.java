@@ -21,7 +21,6 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "product")
 public class Product {
 
     @Id
@@ -68,13 +67,19 @@ public class Product {
 
 
     // automatically create product_flavor table
-    @ManyToMany
+    @ManyToMany(
+            fetch = FetchType.EAGER,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
     @JoinTable(
             name = "product_flavor",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "flavor_id")
     )
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Set<Flavor> flavors;
-
 
 }

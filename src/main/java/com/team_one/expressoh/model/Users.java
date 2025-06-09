@@ -5,8 +5,8 @@ import jakarta.validation.constraints.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name="user", uniqueConstraints = {@UniqueConstraint(name = "email", columnNames = "email")})
-public class User {
+@Table(name="users", uniqueConstraints = {@UniqueConstraint(name = "email", columnNames = "email")})
+public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // primary key, auto-incremented
@@ -28,11 +28,11 @@ public class User {
     @NotNull(message = "Role cannot be blank")
     private EnumRole role;
 
-    public User() {                 // empty constructor
+    public Users() {                 // empty constructor
         role = null;
     }
 
-    public User(String email, String password, EnumRole role) {    // parameterized constructor, id not needed as it is auto generated
+    public Users(String email, String password, EnumRole role) {    // parameterized constructor, id not needed as it is auto generated
         this.email = email;
         this.role = null;
     }

@@ -1,6 +1,9 @@
 package com.team_one.expressoh.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -14,10 +17,12 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // primary key, auto-incremented
     Integer id;
 
-    // user_id integer foreign key
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false) // Foreign key reference to User entity
-    private User user;
+    // users_id integer foreign key
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)            // Foreign key reference to Users entity
+    @JoinColumn(name = "users_id", nullable = false)                // Many Orders come from a users
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})  // resolve BeanSerialization issue
+    @OnDelete(action = OnDeleteAction.RESTRICT)                     // manages the foreign constraint of parent entity (users)
+    private Users users;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate; // Uses LocalDateTime instead of Integer
@@ -25,11 +30,14 @@ public class Order {
     @Column(name = "total_cost", nullable = false)
     private Double totalCost;
 
+    @OneToMany(mappedBy = "order")
+    private Set<OrderProduct> products;
+
     // Constructors, getters, and setters
     public Order() {}
 
-    public Order(User user, LocalDateTime orderDate, Double totalCost) {
-        this.user = user;
+    public Order(Users users, LocalDateTime orderDate, Double totalCost) {
+        this.users = users;
         this.orderDate = orderDate;
         this.totalCost = totalCost;
     }
@@ -38,21 +46,22 @@ public class Order {
         return id;
     }
 
-    public User getUser() {
-        return user;
-    }
-
     public LocalDateTime getOrderDate() {
         return orderDate;
+    }
+
+    public Users getUsers() {
+        return users;
     }
 
     public Double getTotalCost() {
         return totalCost;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUsers(Users users) {
+        this.users = users;
     }
+
 
     public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
@@ -61,8 +70,5 @@ public class Order {
     public void setTotalCost(Double totalCost) {
         this.totalCost = totalCost;
     }
-
-    @OneToMany(mappedBy = "order")
-    private Set<OrderProduct> products;
 
 }
