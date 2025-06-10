@@ -1,21 +1,11 @@
 package com.team_one.expressoh.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 public class Product {
@@ -45,7 +35,8 @@ public class Product {
     @Column(name = "price")
     @DecimalMin(value = "0.0", inclusive = false, message = "Product Price must be more than 0.")
     @Digits(integer = 10, fraction = 2, message = "Product Price must be numerical.")
-    private Double price;
+    private BigDecimal price;
+
 
     @Column(name = "imageurl")
     @NotBlank(message = "Image URL cannot be blank.")
@@ -83,7 +74,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(Integer id, String sku, String name, String description, Double price, String imageURL, @NotNull(message = "Inventory count must be provided.") Integer inventoryCount, List<Flavor> flavors) {
+    public Product(Integer id, String sku, String name, String description, BigDecimal price, String imageURL, @NotNull(message = "Inventory count must be provided.") Integer inventoryCount, List<Flavor> flavors) {
         this.id = id;
         this.sku = sku;
         this.name = name;
@@ -124,11 +115,11 @@ public class Product {
         this.description = description;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

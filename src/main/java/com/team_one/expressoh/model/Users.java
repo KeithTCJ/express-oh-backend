@@ -1,43 +1,56 @@
 package com.team_one.expressoh.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name="users", uniqueConstraints = {@UniqueConstraint(name = "email", columnNames = "email")})
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "email", columnNames = "email")
+})
 public class Users {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // primary key, auto-incremented
-    Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @Column(nullable = false, unique = true)                    // prevents null values and email duplicates
-    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",  // regular expression for email
-            flags = Pattern.Flag.CASE_INSENSITIVE,
-            message = "Email is invalid")
-    String email;
+    // Core authentication fields
+    @Column(nullable = false, unique = true)
+    @NotBlank(message = "Email cannot be blank.")
+    @Email(message = "Email must be valid.")
+    private String email;
 
     @Column(nullable = false)
-    @NotBlank(message="Password cannot be blank")
-    // @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", message = "Password is not strong.")
+    @NotBlank(message = "Password cannot be blank.")
     private String password;
 
-    @Column(nullable = false)
+    @NotNull(message = "Role must be set.")
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Role cannot be blank")
+    @Column(nullable = false)
     private EnumRole role;
 
-    public Users() {                 // empty constructor
-        role = null;
+    // One-to-one relation with Profile
+    // This change guarantees that every time you load a Users object
+    // (for instance, in the sign‑in process),
+    // the associated Profile is retrieved immediately,
+    // so the extra fields (firstName, lastName, phone, etc.) are available.
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "profile_id", referencedColumnName = "id", unique = true, nullable = false)
+    @JsonManagedReference
+    private Profile profile;
+
+    public Users() {
+        // Default constructor required by JPA
     }
 
-    public Users(String email, String password, EnumRole role) {    // parameterized constructor, id not needed as it is auto generated
+    public Users(String email, String password, EnumRole role, Profile profile) {
         this.email = email;
-        this.role = null;
+        this.password = password;
+        this.role = role;
+        this.profile = profile;
     }
 
-    // getters
+    // Getters and setters
 
     public Integer getId() {
         return id;
@@ -47,25 +60,31 @@ public class Users {
         return email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public EnumRole getRole() {
-        return role;
-    }
-
-    // setter
-
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
+    public EnumRole getRole() {
+        return role;
+    }
+
     public void setRole(EnumRole role) {
         this.role = role;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }
