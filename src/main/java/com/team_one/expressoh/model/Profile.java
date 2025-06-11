@@ -3,6 +3,10 @@ package com.team_one.expressoh.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 public class Profile {
@@ -13,6 +17,11 @@ public class Profile {
     @Column(name = "users_id")
     private Integer usersId;
 
+    // This is required - otherwise, when a Users instance is created
+    // JPA thinks the user's profile already exist when it isn't yet
+    @Version
+    private Integer version;
+
     @NotBlank(message = "First name cannot be blank.")
     private String firstName;
 
@@ -21,9 +30,19 @@ public class Profile {
 
    // Bidirectional association (to navigate from Profile to User)
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId // Indicates that the primary key of this entity (usersId) is populated from the primary key of the associated entity (User)
-    @JoinColumn(name = "users_id") // The foreign key column in the 'profile' table
+    @MapsId                         // Indicates that primary key of this entity (usersId) is populated by primary key of associated entity (Users)
+    @JoinColumn(name = "users_id")  // The foreign key column in the 'profile' table
     private Users users;
+
+    @Column
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createdDateTime;
+
+    @Column
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime lastModifiedDateTime;
 
     private String phone;
     private String address;
@@ -128,4 +147,19 @@ public class Profile {
         this.users = users;
     }
 
+    public Integer getVersion() {               // add getter for version
+        return version;
+    }
+
+    public void setVersion(Integer version) {   // setter is optional, JPA manages it, but added for completeness
+        this.version = version;
+    }
+
+    public LocalDateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    public LocalDateTime getLastModifiedDateTime() {
+        return lastModifiedDateTime;
+    }
 }

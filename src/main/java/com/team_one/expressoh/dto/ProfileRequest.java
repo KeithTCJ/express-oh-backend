@@ -4,33 +4,23 @@ import com.team_one.expressoh.model.EnumRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 
-public class AuthRequest {
+import java.time.LocalDateTime;
 
-    @NotBlank(message = "Email is required.")
-    @Email(message = "Please provide a valid email address.")
+public class ProfileRequest {
+
     private String email;
-
-    @NotBlank(message = "Password is required.")
-    private String password;
-
-    @NotNull(message = "Role is required.")
-    private EnumRole role;
-
-   // @Pattern(regexp = "^\\d{8}$", message = "Phone number must be exactly 8 digits.")
-   private String phone;
-
+    private String phone;
     private String firstName;
     private String lastName;
     private String address;
-
     private String cardName;
     private String cardNumber;
     private String cardExpiry;
     private String cardCvv;
+    private LocalDateTime lastModifiedDateTime;
 
-    public AuthRequest() {
+    public ProfileRequest() {
         // Default constructor
     }
 
@@ -41,22 +31,6 @@ public class AuthRequest {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public EnumRole getRole() {
-        return role;
-    }
-
-    public void setRole(EnumRole role) {
-        this.role = role;
     }
 
     public String getFirstName() {
@@ -121,5 +95,13 @@ public class AuthRequest {
 
     public void setCardCvv(String cardCvv) {
         this.cardCvv = cardCvv;
+    }
+
+    public LocalDateTime getLastModifiedDateTime() {
+        return lastModifiedDateTime;
+    }
+
+    public void setLastModifiedDateTime(LocalDateTime lastModifiedDateTime) {
+        this.lastModifiedDateTime = lastModifiedDateTime;
     }
 }

@@ -1,7 +1,7 @@
 package com.team_one.expressoh.controllers;
 
 import com.team_one.expressoh.model.Users;
-import com.team_one.expressoh.service.UserService;
+import com.team_one.expressoh.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +19,11 @@ import java.util.List;
 public class AdminController {
 
     @Autowired
-    private UserService userService;
+    private UsersService usersService;
 
     @GetMapping("/users")
     public ResponseEntity<List<Users>> getAllUsers() {
-        List<Users> users = userService.getAllUsers();
+        List<Users> users = usersService.getAllUsers();
         users.forEach(user -> user.setPassword(null)); // DO NOT RETURN PASSWORD
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
