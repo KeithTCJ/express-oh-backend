@@ -24,12 +24,15 @@ public class WebSecurityConfig {
 
     // Custom service to load user details from your database
     @Autowired
-    private EcommerceUserDetailsService userDetailsService;
+    private EcommerceUserDetailsService ecommerceUserDetailsService;
 
     // Custom JWT filter to validate JWT tokens before standard authentication
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    public WebSecurityConfig(EcommerceUserDetailsService ecommerceUserDetailsService) {
+        this.ecommerceUserDetailsService = ecommerceUserDetailsService;
+    }
     /**
      * Configures HTTP security settings:
      * Disabling CSRF since JWT is used
@@ -46,7 +49,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/profile/**", "/api/cart/**").hasAuthority("CUSTOMER")
+                        .requestMatchers("/api/user/**", "/api/cart/**").hasAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -59,7 +62,7 @@ public class WebSecurityConfig {
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(ecommerceUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

@@ -18,8 +18,8 @@ public class AuthRequest {
     @NotNull(message = "Role is required.")
     private EnumRole role;
 
-    @Pattern(regexp = "^\\d{8}$", message = "Phone number must be exactly 8 digits.")
-    private String phone;
+   // @Pattern(regexp = "^\\d{8}$", message = "Phone number must be exactly 8 digits.")
+   private String phone;
 
     private String firstName;
     private String lastName;

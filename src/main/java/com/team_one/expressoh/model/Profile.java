@@ -7,9 +7,11 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 public class Profile {
 
+    // The users id here in profile matches that from users table
+    // User of id:1, his profile is userId:1
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "users_id")
+    private Integer usersId;
 
     @NotBlank(message = "First name cannot be blank.")
     private String firstName;
@@ -17,10 +19,11 @@ public class Profile {
     @NotBlank(message = "Last name cannot be blank.")
     private String lastName;
 
-    // Bidirectional association (to navigate from Profile to User)
-    @OneToOne(mappedBy = "profile", optional = false)
-    @JsonBackReference
-    private Users user;
+   // Bidirectional association (to navigate from Profile to User)
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId // Indicates that the primary key of this entity (usersId) is populated from the primary key of the associated entity (User)
+    @JoinColumn(name = "users_id") // The foreign key column in the 'profile' table
+    private Users users;
 
     private String phone;
     private String address;
@@ -45,9 +48,12 @@ public class Profile {
         this.cardCvv = cardCvv;
     }
 
-    // Getters and setters
-    public Integer getId() {
-        return id;
+    public Integer getUsersId() {
+        return usersId;
+    }
+
+    public void setUsersId(Integer usersId) {
+        this.usersId = usersId;
     }
 
     public String getFirstName() {
@@ -114,11 +120,12 @@ public class Profile {
         this.cardCvv = cardCvv;
     }
 
-    public Users getUser() {
-        return user;
+    public Users getUsers() {
+        return users;
     }
 
-    public void setUser(Users user) {
-        this.user = user;
+    public void setUsers(Users users) {
+        this.users = users;
     }
+
 }

@@ -1,5 +1,6 @@
 package com.team_one.expressoh.config;
 
+import com.team_one.expressoh.service.EcommerceUserDetailsService;
 import com.team_one.expressoh.service.JWTUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,7 +23,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JWTUtils jwtUtils;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private EcommerceUserDetailsService ecommerceUserDetailsService;
+
+    public JwtAuthenticationFilter(EcommerceUserDetailsService ecommerceUserDetailsService) {
+        this.ecommerceUserDetailsService = ecommerceUserDetailsService;
+    }
 
     /**
      * For each HTTP request, it checks for a JWT in the Authorization header,
@@ -36,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer:")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -45,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String username = jwtUtils.extractUsername(jwtToken);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = ecommerceUserDetailsService.loadUserByUsername(username);
 
             // Validate the token with respect to the user details.
             if (jwtUtils.isTokenValid(jwtToken, userDetails)) {

@@ -11,13 +11,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.team_one.expressoh.model.Profile;
-
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,8 +33,6 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
 
 
     public AuthResponse signUp(AuthRequest signUpRequest) throws Exception {
@@ -52,37 +46,16 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setRole(signUpRequest.getRole());
 
-        // Create and populate the Profile (assuming the AuthRequest has these fields)
-        Profile profile = new Profile();
-        profile.setFirstName(signUpRequest.getFirstName());
-        profile.setLastName(signUpRequest.getLastName());
-        profile.setPhone(signUpRequest.getPhone());
-        profile.setAddress(signUpRequest.getAddress());
-        profile.setCardName(signUpRequest.getCardName());
-        profile.setCardNumber(signUpRequest.getCardNumber());
-        profile.setCardExpiry(signUpRequest.getCardExpiry());
-        profile.setCardCvv(signUpRequest.getCardCvv());
-
-        // Bidirectional association
-        user.setProfile(profile);
-        profile.setUser(user);
-
         // Save the user (the cascade setting will save the profile too)
         usersRepository.save(user);
 
-        UserDetails securityUser = userDetailsService.loadUserByUsername(user.getEmail());
-        String token = jwtUtils.generateToken(securityUser);
-
         // If you need a UserDetails instance, you could do:
-        // UserDetails securityUser = userDetailsService.loadUserByUsername(user.getEmail());
         // String token = jwtUtils.generateToken(securityUser);
 
         // 7. Build the authentication response, including only the desired fields.
         AuthResponse response = new AuthResponse();
         response.setMessage("User registered successfully.");
         response.setEmail(user.getEmail());
-        response.setFirstName(profile.getFirstName());
-        response.setToken(token);
 
         // 8. Return the response object.
         return response;
@@ -118,6 +91,7 @@ public class AuthService {
         response.setMessage("User signed in successfully.");
         response.setEmail(user.getEmail());
 
+        // Use the user profile -->
         if (user.getProfile() != null) {
             response.setFirstName(user.getProfile().getFirstName());
             response.setLastName(user.getProfile().getLastName());

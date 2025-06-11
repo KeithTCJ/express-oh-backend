@@ -1,14 +1,21 @@
 package com.team_one.expressoh.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(name = "email", columnNames = "email")
 })
-public class Users {
+public class Users implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,21 +41,25 @@ public class Users {
     // (for instance, in the sign‑in process),
     // the associated Profile is retrieved immediately,
     // so the extra fields (firstName, lastName, phone, etc.) are available.
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "profile_id", referencedColumnName = "id", unique = true, nullable = false)
-    @JsonManagedReference
+
+    @OneToOne(
+            mappedBy = "users",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+    )
+    @PrimaryKeyJoinColumn
     private Profile profile;
 
     public Users() {
         // Default constructor required by JPA
     }
 
-    public Users(String email, String password, EnumRole role, Profile profile) {
+    public Users(String email, String password, EnumRole role) {
         this.email = email;
         this.password = password;
         this.role = role;
-        this.profile = profile;
     }
+
 
     // Getters and setters
 
@@ -64,10 +75,6 @@ public class Users {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -80,11 +87,53 @@ public class Users {
         this.role = role;
     }
 
+    // Users Class should incorporate UserDetails Service
+    // where the following overridden methods apply
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
     public Profile getProfile() {
         return profile;
     }
 
+    // Convenience method for bidirectional linking for users to update profile
     public void setProfile(Profile profile) {
         this.profile = profile;
+        if (profile != null) {
+            profile.setUsers(this);
+            profile.setUsersId(this.id); //Link the ID here if you want to set it programmatically
+        }
     }
 }
