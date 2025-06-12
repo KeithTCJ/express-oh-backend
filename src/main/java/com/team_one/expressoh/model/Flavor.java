@@ -31,6 +31,7 @@ public class Flavor {
                     CascadeType.REFRESH
             }
     )
+
     @JoinTable(
             name = "product_flavor",
             joinColumns = @JoinColumn(name = "flavor_id"),

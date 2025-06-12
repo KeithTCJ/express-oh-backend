@@ -85,6 +85,12 @@ public class Product {
         this.flavors = flavors;
     }
 
+    public void removeFlavor(Integer flavorId) {
+        if (flavors != null) {
+            flavors.removeIf(f -> f.getId().equals(flavorId));
+        }
+    }
+
     // Getters and Setters
 
     public Integer getId() {
