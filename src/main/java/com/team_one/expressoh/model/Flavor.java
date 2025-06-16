@@ -43,6 +43,9 @@ public class Flavor {
 
     public Flavor() {
     }
+    public Flavor(Integer id) {
+        this.id = id;
+    }
 
     public Flavor(String name) {
         this.name = name;

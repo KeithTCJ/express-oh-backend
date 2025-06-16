@@ -6,9 +6,14 @@ import com.team_one.expressoh.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin/products")
@@ -64,6 +69,42 @@ public class AdminProductController {
             return ResponseEntity.ok(updatedProduct);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    // -------------------------------
+    // NEW: Upload product image
+    // -------------------------------
+    @PostMapping("/{productId}/image")
+    public ResponseEntity<?> uploadProductImage(
+            @PathVariable Integer productId,
+            @RequestParam("image") MultipartFile file
+    ) {
+        try {
+            Optional<Product> optionalProduct = productService.getProductById(productId);
+            if (optionalProduct.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            String fileName = file.getOriginalFilename();
+            String uploadDir = "uploads/images/";
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            Path filePath = Paths.get(uploadDir, fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Save image URL to DB
+            Product product = optionalProduct.get();
+            String imageUrl = "/images/" + fileName;
+            product.setImageURL(imageUrl);
+            productService.save(product);
+
+            return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Image upload failed: " + e.getMessage());
         }
     }
 }

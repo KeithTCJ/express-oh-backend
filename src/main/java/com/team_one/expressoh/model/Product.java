@@ -40,13 +40,7 @@ public class Product {
 
 
     @Column(name = "imageurl")
-    @NotBlank(message = "Image URL cannot be blank.")
-    @Size(min = 3, message = "IMAGE URL must be at least 3 characters.")
-    @Pattern(
-            regexp = "^(https?)://.*$",
-            message = "Invalid URL format. Must start with http or https."
-    )
-    private String imageURL;
+    private String imageURL; // We'll set this to something like "/images/abc123.jpg"
 
     @Column(name = "inventory", nullable = false)
     @NotNull(message = "Inventory count must be provided.")

@@ -7,6 +7,7 @@ import com.team_one.expressoh.repository.ProductRepository;
 import com.team_one.expressoh.repository.FlavorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,19 +32,32 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
+    @Transactional
     public Product createProduct(Product product) {
+        // Check for duplicate SKU
         if (productRepository.existsBySku(product.getSku())) {
             throw new IllegalArgumentException("Product with SKU " + product.getSku() + " already exists");
         }
+
+        // Ensure flavors are managed entities
+        if (product.getFlavors() != null && !product.getFlavors().isEmpty()) {
+            List<Integer> flavorIds = product.getFlavors().stream()
+                    .map(Flavor::getId)
+                    .toList();
+
+            List<Flavor> managedFlavors = flavorRepository.findAllById(flavorIds);
+            product.setFlavors(managedFlavors);
+        }
+
         return productRepository.save(product);
     }
 
+    @Transactional
     public Product updateProduct(Integer productId, ProductUpdateDTO productDto) {
-        // Find the product by ID or throw an exception.
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-        // Update basic fields.
+        // Update basic fields
         product.setSku(productDto.getSku());
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
@@ -51,23 +65,30 @@ public class ProductService {
         product.setInventoryCount(productDto.getInventory());
         product.setImageURL(productDto.getImageurl());
 
-        // Process flavor association.
-        if (productDto.getFlavors() != null && !productDto.getFlavors().isEmpty()) {
-            List<Flavor> flavors = flavorRepository.findAllById(productDto.getFlavors());
-            product.setFlavors(flavors);
-        } else {
-            // Optionally, clear the flavors if an empty list is provided.
-            product.getFlavors().clear();
+        // Handle flavor updates
+        if (productDto.getFlavors() != null) {
+            if (productDto.getFlavors().isEmpty()) {
+                product.getFlavors().clear();
+            } else {
+                List<Flavor> managedFlavors = flavorRepository.findAllById(productDto.getFlavors());
+                product.setFlavors(managedFlavors);
+            }
         }
 
-        // Save and return the updated product.
         return productRepository.save(product);
     }
 
+    @Transactional
     public void deleteProduct(Integer id) {
         if (!productRepository.existsById(id)) {
             throw new IllegalArgumentException("Product not found with id: " + id);
         }
         productRepository.deleteById(id);
     }
+
+    @Transactional
+    public Product save(Product product) {
+        return productRepository.save(product);
+    }
+
 }
