@@ -40,6 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
+        final  String jwtToken;
+        final String userEmail;
 
         if (authHeader == null || authHeader.isBlank()) {
             filterChain.doFilter(request, response);
@@ -47,20 +49,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Extract the JWT token by removing the "Bearer " prefix
-        final String jwtToken = authHeader.substring(7);
+        jwtToken = authHeader.substring(7);
+        userEmail = jwtUtils.extractUsername(jwtToken);
 
-        String username = jwtUtils.extractUsername(jwtToken);
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = ecommerceUserDetailsService.loadUserByUsername(username);
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = ecommerceUserDetailsService.loadUserByUsername(userEmail);
 
             // Validate the token with respect to the user details.
             if (jwtUtils.isTokenValid(jwtToken, userDetails)) {
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                securityContext.setAuthentication(authToken);
+                token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                securityContext.setAuthentication(token);
                 SecurityContextHolder.setContext(securityContext);
             }
         }

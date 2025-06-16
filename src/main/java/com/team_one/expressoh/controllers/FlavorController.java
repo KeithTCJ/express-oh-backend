@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/api/flavor")
-@CrossOrigin("*")
+@RequestMapping("/api/admin/flavor")
+@CrossOrigin(origins = "*")
 public class FlavorController {
 
     @Autowired
@@ -34,11 +34,9 @@ public class FlavorController {
         } else {
             result.addAll(flavorRepository.findByNameContaining(name));
         }
-
         if (result.isEmpty()) {
             throw new ResourceNotFoundException();
         }
-
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

@@ -22,8 +22,6 @@ public class JWTUtils {
     // Initialize the secret key using an encoded string.
     public JWTUtils() {
         String secreteString = "843567893696976453275974432697R634976R738467TR678T34865R6834R8763T478378637664538745673865783678548735687R3";
-
-        // Decode the secret string bytes and create a SecretKeySpec with HmacSHA256 algorithm.
         byte[] keyBytes = Base64.getDecoder().decode(secreteString.getBytes(StandardCharsets.UTF_8));
         this.secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
     }
@@ -31,9 +29,9 @@ public class JWTUtils {
     // Generates a JWT token containing the username and roles as claims.
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .claim("roles", userDetails.getAuthorities())
                 .signWith(secretKey)
                 .compact();
@@ -42,10 +40,10 @@ public class JWTUtils {
     // Generates a refresh token with additional claims.
     public String generateRefreshToken(HashMap<String, Object> claims, UserDetails userDetails) {
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(secretKey)
                 .compact();
     }
@@ -62,18 +60,12 @@ public class JWTUtils {
     }
 
     // Generic method to extract a specific claim using a provided resolver function.
-    private <T> T extractClaims(String token, Function<Claims, T> claimsExtractor) {
-        Claims claims = Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claimsExtractor.apply(claims);
+    private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction){
+        return claimsTFunction.apply(Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload());
     }
 
     // Checks if the token is expired.
-    public boolean isTokenExpired(String token) {
-        Date expirationDate = extractClaims(token, Claims::getExpiration);
-        return expirationDate.before(new Date());
+    public boolean isTokenExpired(String token){
+        return extractClaims(token, Claims::getExpiration).before(new Date());
     }
 }

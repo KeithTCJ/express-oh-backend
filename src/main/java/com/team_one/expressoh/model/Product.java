@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -66,8 +67,7 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "flavor_id")
     )
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private List<Flavor> flavors;
+    private List<Flavor> flavors = new ArrayList<>();
 
     // Constructors
 
@@ -152,4 +152,5 @@ public class Product {
     public void setFlavors(List<Flavor> flavors) {
         this.flavors = flavors;
     }
+
 }

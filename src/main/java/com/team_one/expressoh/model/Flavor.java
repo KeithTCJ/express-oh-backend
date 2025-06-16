@@ -13,7 +13,7 @@ public class Flavor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // primary key, auto-incremented
-    Integer id;
+    private Integer id;
 
     @Column(name = "name")
     @NotBlank(message = "Flavor name cannot be blank.")

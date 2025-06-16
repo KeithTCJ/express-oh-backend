@@ -50,6 +50,7 @@ public class AuthService {
         usersRepository.save(user);
 
         // If you need a UserDetails instance, you could do:
+        // UserDetails securityUser = userDetailsService.loadUserByUsername(user.getEmail());
         // String token = jwtUtils.generateToken(securityUser);
 
         // 7. Build the authentication response, including only the desired fields.

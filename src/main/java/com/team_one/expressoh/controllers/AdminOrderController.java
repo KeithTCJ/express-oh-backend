@@ -1,7 +1,6 @@
 package com.team_one.expressoh.controllers;
 
-import com.team_one.expressoh.model.Product;
-import com.team_one.expressoh.service.ProductService;
+import com.team_one.expressoh.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -9,20 +8,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/admin/orders")
 @CrossOrigin(origins = "*")
-public class PublicProductController {
+public class AdminOrderController {
 
     @Autowired
-    ProductService productService;
+    private OrderService orderService;
 
-    @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
+    @GetMapping("/monthly-orders")
+    public ResponseEntity<Map<String, Integer>> getMonthlyOrders() {
+        Map<String, Integer> monthlyOrders = orderService.getMonthlyOrders();
+        return ResponseEntity.ok(monthlyOrders);
     }
-
 }

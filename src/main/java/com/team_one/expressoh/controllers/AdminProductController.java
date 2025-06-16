@@ -1,15 +1,18 @@
 package com.team_one.expressoh.controllers;
 
+import com.team_one.expressoh.dto.ProductUpdateDTO;
 import com.team_one.expressoh.model.Product;
 import com.team_one.expressoh.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/products")
+@CrossOrigin(origins = "*")
 public class AdminProductController {
 
     private final ProductService productService;
@@ -42,21 +45,23 @@ public class AdminProductController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Integer id, @RequestBody Product productDetails) {
-        try {
-            Product updatedProduct = productService.updateProduct(id, productDetails);
-            return ResponseEntity.ok(updatedProduct);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         try {
             productService.deleteProduct(id);
             return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Endpoint to update the product with its basic info and flavor associations.
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Integer id,
+                                                 @RequestBody ProductUpdateDTO productDto) {
+        try {
+            Product updatedProduct = productService.updateProduct(id, productDto);
+            return ResponseEntity.ok(updatedProduct);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
