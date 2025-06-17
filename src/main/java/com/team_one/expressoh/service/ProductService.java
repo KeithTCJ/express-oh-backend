@@ -6,14 +6,21 @@ import com.team_one.expressoh.model.Product;
 import com.team_one.expressoh.repository.ProductRepository;
 import com.team_one.expressoh.repository.FlavorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProductService {
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     private final ProductRepository productRepository;
     private final FlavorRepository flavorRepository;
@@ -33,7 +40,7 @@ public class ProductService {
     }
 
     @Transactional
-    public Product createProduct(Product product) {
+    public Product createProduct(Product product, MultipartFile imageFile) throws IOException {
         // Check for duplicate SKU
         if (productRepository.existsBySku(product.getSku())) {
             throw new IllegalArgumentException("Product with SKU " + product.getSku() + " already exists");
@@ -49,11 +56,19 @@ public class ProductService {
             product.setFlavors(managedFlavors);
         }
 
+        if (imageFile != null && !imageFile.isEmpty()){
+            // Create a file structure to upload to uploads/images/filename.jpg
+            String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+            File img = new File(uploadDir + File.separator + fileName);
+            imageFile.transferTo(img.toPath());
+            product.setImageURL(String.format("/%s/%s", uploadDir, fileName));
+        }
+
         return productRepository.save(product);
     }
 
     @Transactional
-    public Product updateProduct(Integer productId, ProductUpdateDTO productDto) {
+    public Product updateProduct(Integer productId, ProductUpdateDTO productDto, MultipartFile imageFile) throws IOException {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
@@ -62,8 +77,7 @@ public class ProductService {
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
-        product.setInventoryCount(productDto.getInventory());
-        product.setImageURL(productDto.getImageurl());
+        product.setInventoryCount(productDto.getInventoryCount());
 
         // Handle flavor updates
         if (productDto.getFlavors() != null) {
@@ -73,6 +87,14 @@ public class ProductService {
                 List<Flavor> managedFlavors = flavorRepository.findAllById(productDto.getFlavors());
                 product.setFlavors(managedFlavors);
             }
+        }
+
+        if (imageFile != null && !imageFile.isEmpty()){
+            // Create a file structure to upload to uploads/images/filename.jpg
+            String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+            File img = new File(uploadDir + File.separator + fileName);
+            imageFile.transferTo(img.toPath());
+            product.setImageURL(String.format("/%s/%s", uploadDir, fileName));
         }
 
         return productRepository.save(product);

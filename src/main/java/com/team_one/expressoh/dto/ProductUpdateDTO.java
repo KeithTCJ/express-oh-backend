@@ -8,7 +8,7 @@ public class ProductUpdateDTO {
     private String name;
     private String description;
     private BigDecimal price;
-    private Integer inventory;
+    private Integer inventoryCount;
     private String imageurl;
     private List<Integer> flavors; // List of flavor IDs
 
@@ -37,11 +37,11 @@ public class ProductUpdateDTO {
     public void setPrice(BigDecimal price) {
         this.price = price;
     }
-    public Integer getInventory() {
-        return inventory;
+    public Integer getInventoryCount() {
+        return inventoryCount;
     }
-    public void setInventory(Integer inventory) {
-        this.inventory = inventory;
+    public void setInventoryCount(Integer inventoryCount) {
+        this.inventoryCount = inventoryCount;
     }
     public String getImageurl() {
         return imageurl;

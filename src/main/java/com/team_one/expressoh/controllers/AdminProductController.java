@@ -1,8 +1,12 @@
 package com.team_one.expressoh.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team_one.expressoh.dto.ProductUpdateDTO;
 import com.team_one.expressoh.model.Product;
 import com.team_one.expressoh.service.ProductService;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,9 +45,16 @@ public class AdminProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> createProduct(
+            @Valid @RequestPart("product") String data,
+            @Nullable @RequestPart("image") MultipartFile imageFile) throws Exception {
+
+        // textual data sent as product will need to be mapped to Product class first
+        ObjectMapper objectMapper = new ObjectMapper();
+        Product product = objectMapper.readValue(data, Product.class);
+
         try {
-            Product createdProduct = productService.createProduct(product);
+            Product createdProduct = productService.createProduct(product, imageFile);
             return ResponseEntity.ok(createdProduct);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
@@ -63,9 +74,14 @@ public class AdminProductController {
     // Endpoint to update the product with its basic info and flavor associations.
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Integer id,
-                                                 @RequestBody ProductUpdateDTO productDto) {
+                                                 @Valid @RequestPart("product") String data,
+                                                 @Nullable @RequestPart("image") MultipartFile imageFile) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProductUpdateDTO product = objectMapper.readValue(data, ProductUpdateDTO.class);
+
         try {
-            Product updatedProduct = productService.updateProduct(id, productDto);
+            Product updatedProduct = productService.updateProduct(id, product, imageFile);
             return ResponseEntity.ok(updatedProduct);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
