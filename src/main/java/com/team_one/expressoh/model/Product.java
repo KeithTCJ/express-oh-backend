@@ -1,33 +1,19 @@
 package com.team_one.expressoh.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-@Data //Generates the getters, setters, toString, @RequiredArgsConstructor
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
-@Table(name = "product")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     @Column(name="sku")
     @NotBlank(message = "Product SKU cannot be blank.")
@@ -52,14 +38,9 @@ public class Product {
     @Digits(integer = 10, fraction = 2, message = "Product Price must be numerical.")
     private BigDecimal price;
 
+
     @Column(name = "imageurl")
-    @NotBlank(message = "Image URL cannot be blank.")
-    @Size(min = 3, message = "IMAGE URL must be at least 3 characters.")
-    @Pattern(
-            regexp = "^(https?)://.*$",
-            message = "Invalid URL format. Must start with http or https."
-    )
-    private String imageURL;
+    private String imageURL; // We'll set this to something like "/images/abc123.jpg"
 
     @Column(name = "inventory", nullable = false)
     @NotNull(message = "Inventory count must be provided.")
@@ -68,13 +49,102 @@ public class Product {
 
 
     // automatically create product_flavor table
-    @ManyToMany
+    @ManyToMany(
+            fetch = FetchType.EAGER,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
     @JoinTable(
             name = "product_flavor",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "flavor_id")
     )
-    private Set<Flavor> flavors;
+    private List<Flavor> flavors = new ArrayList<>();
 
+    // Constructors
+
+    public Product() {
+    }
+
+    public Product(Integer id, String sku, String name, String description, BigDecimal price, String imageURL, @NotNull(message = "Inventory count must be provided.") Integer inventoryCount, List<Flavor> flavors) {
+        this.id = id;
+        this.sku = sku;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.imageURL = imageURL;
+        this.inventoryCount = inventoryCount;
+        this.flavors = flavors;
+    }
+
+    public void removeFlavor(Integer flavorId) {
+        if (flavors != null) {
+            flavors.removeIf(f -> f.getId().equals(flavorId));
+        }
+    }
+
+    // Getters and Setters
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
+    public Integer getInventoryCount() {
+        return inventoryCount;
+    }
+
+    public void setInventoryCount(Integer inventoryCount) {
+        this.inventoryCount = inventoryCount;
+    }
+
+    public List<Flavor> getFlavors() {
+        return flavors;
+    }
+
+    public void setFlavors(List<Flavor> flavors) {
+        this.flavors = flavors;
+    }
 
 }
