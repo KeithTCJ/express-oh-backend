@@ -25,19 +25,25 @@ public class UserController {
     public ResponseEntity<ProfileRequest> getProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+
         Users user = usersService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("No user found."));
 
         ProfileRequest returnProfile = new ProfileRequest();
         returnProfile.setEmail(user.getEmail());
-        returnProfile.setFirstName(user.getProfile().getFirstName());
-        returnProfile.setLastName(user.getProfile().getLastName());
-        returnProfile.setPhone(user.getProfile().getPhone());
-        returnProfile.setAddress(user.getProfile().getAddress());
-        returnProfile.setLastModifiedDateTime(user.getProfile().getLastModifiedDateTime());
+
+        Profile profile = user.getProfile();
+        if (profile != null) {
+            returnProfile.setFirstName(profile.getFirstName());
+            returnProfile.setLastName(profile.getLastName());
+            returnProfile.setPhone(profile.getPhone());
+            returnProfile.setAddress(profile.getAddress());
+            returnProfile.setLastModifiedDateTime(profile.getLastModifiedDateTime());
+        }
 
         return new ResponseEntity<>(returnProfile, HttpStatus.OK);
     }
+
 
     @PostMapping("/profile")
     public ResponseEntity<ProfileRequest> saveProfile(@Valid @RequestBody ProfileRequest profileRequest) {

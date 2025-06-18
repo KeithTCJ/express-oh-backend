@@ -40,32 +40,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        final  String jwtToken;
-        final String userEmail;
+        System.out.println("[JwtAuthFilter] Authorization header: " + authHeader);
 
-        if (authHeader == null || authHeader.isBlank()) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("[JwtAuthFilter] No Bearer token found, continuing filter chain.");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extract the JWT token by removing the "Bearer " prefix
-        jwtToken = authHeader.substring(7);
-        userEmail = jwtUtils.extractUsername(jwtToken);
+        final String jwtToken = authHeader.substring(7);
+        final String userEmail = jwtUtils.extractUsername(jwtToken);
+        System.out.println("[JwtAuthFilter] Extracted userEmail from token: " + userEmail);
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = ecommerceUserDetailsService.loadUserByUsername(userEmail);
+            System.out.println("[JwtAuthFilter] Loaded UserDetails: " + userDetails.getUsername());
+            System.out.println("[JwtAuthFilter] User authorities: " + userDetails.getAuthorities());
 
-            // Validate the token with respect to the user details.
             if (jwtUtils.isTokenValid(jwtToken, userDetails)) {
-                SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                securityContext.setAuthentication(token);
-                SecurityContextHolder.setContext(securityContext);
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("[JwtAuthFilter] SecurityContext updated with authenticated user.");
+            } else {
+                System.out.println("[JwtAuthFilter] JWT token is NOT valid.");
             }
+        } else {
+            System.out.println("[JwtAuthFilter] userEmail is null or SecurityContext already has authentication.");
         }
+
         filterChain.doFilter(request, response);
     }
 }
