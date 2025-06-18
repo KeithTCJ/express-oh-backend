@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+
 
 // Customer Profile Endpoint
 @RestController
@@ -81,5 +83,34 @@ public class UserController {
         }
 
         return new ResponseEntity<>(returnProfile, HttpStatus.OK);
+    }
+    @GetMapping("/profile/cardinfo")
+    public ResponseEntity<Map<String, String>> getMaskedCardInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Users user = usersService.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No user found."));
+
+        Profile profile = user.getProfile();
+
+        if (profile == null || profile.getCardNumber() == null || profile.getCardNumber().length() < 4) {
+            // No card info or invalid card number
+            return ResponseEntity.ok(Map.of(
+                    "maskedCardNumber", "",
+                    "cardName", profile != null ? profile.getCardName() : "",
+                    "expiryDate", profile != null ? profile.getCardExpiry() : ""
+            ));
+        }
+
+        String cardNumber = profile.getCardNumber();
+        String last4Digits = cardNumber.substring(cardNumber.length() - 4);
+        String maskedNumber = "**** **** **** " + last4Digits;
+
+        return ResponseEntity.ok(Map.of(
+                "maskedCardNumber", maskedNumber,
+                "cardName", profile.getCardName(),
+                "expiryDate", profile.getCardExpiry() != null ? profile.getCardExpiry() : ""
+        ));
     }
 }
