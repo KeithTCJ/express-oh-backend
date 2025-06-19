@@ -72,4 +72,12 @@ public class Order {
         this.totalCost = totalCost;
     }
 
+    public List<OrderProduct> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<OrderProduct> products) {
+        this.products = products;
+    }
+
 }

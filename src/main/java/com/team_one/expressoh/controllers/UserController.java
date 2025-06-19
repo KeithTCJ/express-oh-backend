@@ -1,9 +1,13 @@
 package com.team_one.expressoh.controllers;
 
+import com.team_one.expressoh.service.OrderService;
+import com.team_one.expressoh.model.Order;
+import com.team_one.expressoh.dto.OrderResponseDTO;
 import com.team_one.expressoh.dto.ProfileRequest;
 import com.team_one.expressoh.model.Profile;
 import com.team_one.expressoh.model.Users;
 import com.team_one.expressoh.service.UsersService;
+import com.team_one.expressoh.mapper.OrderMapper; // <-- Add this import
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,8 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
+import java.util.List;
+import java.util.Map;
 
 // Customer Profile Endpoint
 @RestController
@@ -22,6 +27,12 @@ public class UserController {
 
     @Autowired
     private UsersService usersService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderMapper orderMapper; // <-- Add this
 
     @GetMapping("/profile")
     public ResponseEntity<ProfileRequest> getProfile() {
@@ -45,7 +56,6 @@ public class UserController {
 
         return new ResponseEntity<>(returnProfile, HttpStatus.OK);
     }
-
 
     @PostMapping("/profile")
     public ResponseEntity<ProfileRequest> saveProfile(@Valid @RequestBody ProfileRequest profileRequest) {
@@ -84,6 +94,7 @@ public class UserController {
 
         return new ResponseEntity<>(returnProfile, HttpStatus.OK);
     }
+
     @GetMapping("/profile/cardinfo")
     public ResponseEntity<Map<String, String>> getMaskedCardInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -112,5 +123,13 @@ public class UserController {
                 "cardName", profile.getCardName(),
                 "expiryDate", profile.getCardExpiry() != null ? profile.getCardExpiry() : ""
         ));
+    }
+
+    @GetMapping("/profile/orders")
+    public ResponseEntity<List<OrderResponseDTO>> getUserOrders(Authentication authentication) {
+        String email = authentication.getName();
+        List<Order> orders = orderService.getOrdersByUserEmail(email);
+        List<OrderResponseDTO> response = orderMapper.toOrderResponseDTOs(orders); // Mapping orders to DTO
+        return ResponseEntity.ok(response);
     }
 }
