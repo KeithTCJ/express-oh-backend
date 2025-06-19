@@ -75,7 +75,7 @@ public class WebSecurityConfig {
     // returns a new instance of a BCryptPasswordEncoder to securely encode passwords
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+       return new BCryptPasswordEncoder();
     }
 
     // returns the AuthenticationManager bean for handling user authentication.
